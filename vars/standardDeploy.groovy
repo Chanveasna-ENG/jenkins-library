@@ -47,6 +47,7 @@ def call(Map config = [:]) {
                       -v \$(pwd):/src \\
                       -v ${cacheDir}/trivy:/root/.cache/trivy \\
                       ${env.TRIVY_IMAGE} fs \\
+					  --scanners vuln,secret,misconfig \\
                       --severity HIGH,CRITICAL \\
                       --exit-code 1 \\
                       /src

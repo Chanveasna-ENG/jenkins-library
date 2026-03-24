@@ -34,7 +34,7 @@ def call(Map config = [:]) {
                     docker run --rm \\
                       -v \$(pwd):/src \\
                       -v ${cacheDir}/semgrep:/root/.cache/semgrep \\
-                      -e SEMGREP_APP_TOKEN=${SEMGREP_APP_TOKEN} \\
+                      -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
                       ${env.SEMGREP_IMAGE} semgrep ci
                     """
                 }

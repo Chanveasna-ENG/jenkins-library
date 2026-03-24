@@ -16,6 +16,7 @@ def call(Map config = [:]) {
             SEMGREP_IMAGE = 'returntocorp/semgrep'
             ZAP_IMAGE = 'owasp/zap2docker-stable'
             FULL_APP_PATH = "${projectDir}/${appSubdir}"
+			STAGING_DIR = "${projectDir}/jenkins_staging/${env.JOB_NAME}"
             SEMGREP_APP_TOKEN = credentials('SEMGREP_APP_TOKEN')
         }
 
@@ -28,14 +29,24 @@ def call(Map config = [:]) {
                 }
             }
 
+			stage('Staging') {
+                steps {
+                    sh """
+                    mkdir -p ${STAGING_DIR}
+                    rsync -a --delete ./ ${STAGING_DIR}/
+                    """
+                }
+            }
+
             stage('Security: Static Analysis (Semgrep Pro)') {
                 steps {
                     sh """
                     docker run --rm \\
-                      -v \$(pwd):/src \\
-                      -v ${cacheDir}/semgrep:/root/.cache/semgrep \\
+                      -v "${STAGING_DIR}:/src" \\
+                      -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
                       -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
-                      ${env.SEMGREP_IMAGE} semgrep ci
+					  -w /src \\
+					  ${env.SEMGREP_IMAGE} semgrep ci
                     """
                 }
             }
@@ -44,20 +55,24 @@ def call(Map config = [:]) {
                 steps {
                     sh """
                     docker run --rm \\
-                      -v \$(pwd):/src \\
-                      -v ${cacheDir}/trivy:/root/.cache/trivy \\
+                      -v "${STAGING_DIR}:/src" \\
+                      -v "${cacheDir}/trivy:/root/.cache/trivy" \\
+					  -w /src \\
                       ${env.TRIVY_IMAGE} fs \\
 					  --scanners vuln,secret,misconfig \\
                       --severity HIGH,CRITICAL \\
                       --exit-code 1 \\
-                      /src
+                      .
                     """
                 }
             }
 
             stage('Build Image') {
                 steps {
-                    sh "docker build -t ${serviceName}:test ."
+                    sh """
+                    cd ${STAGING_DIR}
+                    docker build -t ${serviceName}:test .
+                    """
                 }
             }
 
@@ -99,7 +114,7 @@ def call(Map config = [:]) {
                     sh """
                     docker tag ${serviceName}:test ${serviceName}:latest
                     mkdir -p ${FULL_APP_PATH}
-                    rsync -a --delete --exclude='.git' ./ ${FULL_APP_PATH}/
+                    rsync -a --delete --exclude='.git' ${STAGING_DIR}/ ${FULL_APP_PATH}/
                     cd ${projectDir}
                     docker compose up -d ${serviceName}
                     """
@@ -110,6 +125,7 @@ def call(Map config = [:]) {
         post {
             always {
                 cleanWs()
+				sh "rm -rf ${STAGING_DIR} || true"
                 sh 'docker image prune -f || true'
                 sh 'docker container prune -f || true'
             }

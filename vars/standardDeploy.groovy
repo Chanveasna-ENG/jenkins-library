@@ -42,11 +42,11 @@ def call(Map config = [:]) {
                 steps {
                     sh """
                     docker run --rm \\
-                      -v "${STAGING_DIR}:/src" \\
-                      -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
-                      -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
-					  -w /src \\
-					  ${env.SEMGREP_IMAGE} semgrep ci
+                        -v "${STAGING_DIR}:/src" \\
+                        -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
+                        -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
+                        -w /src \\
+                        ${env.SEMGREP_IMAGE} semgrep ci
                     """
                 }
             }
@@ -55,14 +55,14 @@ def call(Map config = [:]) {
                 steps {
                     sh """
                     docker run --rm \\
-                      -v "${STAGING_DIR}:/src" \\
-                      -v "${cacheDir}/trivy:/root/.cache/trivy" \\
-					  -w /src \\
-                      ${env.TRIVY_IMAGE} fs \\
-					  --scanners vuln,secret,misconfig \\
-                      --severity HIGH,CRITICAL \\
-                      --exit-code 1 \\
-                      .
+                        -v "${STAGING_DIR}:/src" \\
+                        -v "${cacheDir}/trivy:/root/.cache/trivy" \\
+                        -w /src \\
+                        ${env.TRIVY_IMAGE} fs \\
+                        --scanners vuln,secret,misconfig \\
+                        --severity HIGH,CRITICAL \\
+                        --exit-code 1 \\
+                        .
                     """
                 }
             }
@@ -80,12 +80,12 @@ def call(Map config = [:]) {
                 steps {
                     sh """
                     docker run --rm \\
-                      -v /var/run/docker.sock:/var/run/docker.sock \\
-                      -v ${cacheDir}/trivy:/root/.cache/trivy \\
-                      ${env.TRIVY_IMAGE} image \\
-                      --severity HIGH,CRITICAL \\
-                      --exit-code 1 \\
-                      ${serviceName}:test
+                        -v /var/run/docker.sock:/var/run/docker.sock \\
+                        -v ${cacheDir}/trivy:/root/.cache/trivy \\
+                        ${env.TRIVY_IMAGE} image \\
+                        --severity HIGH,CRITICAL \\
+                        --exit-code 1 \\
+                        ${serviceName}:test
                     """
                 }
             }
@@ -100,7 +100,13 @@ def call(Map config = [:]) {
 
             stage('Security: Live Attack (OWASP ZAP)') {
                 steps {
-                    sh "docker run --rm --network=host ${env.ZAP_IMAGE} zap-baseline.py -t http://localhost:${testPort} -r zap_report.html"
+                    sh """
+                    docker run --rm --network=host \\
+                        -v "${STAGING_DIR}:/zap/wrk/:rw" \\
+                        ${env.ZAP_IMAGE} zap-baseline.py \\
+                        -t http://localhost:${testPort} \\
+                        -r zap_report.html
+                    """
                 }
                 post {
                     always {

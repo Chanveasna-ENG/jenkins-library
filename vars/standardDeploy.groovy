@@ -111,7 +111,8 @@ def call(Map config = [:]) {
                         -v "${STAGING_DIR}:/zap/wrk/:rw" \\
                         ${env.ZAP_IMAGE} zap-baseline.py \\
                         -t http://localhost:${testPort} \\
-                        -r zap_report.html
+                        -r zap_report.html \\
+                        -I
                     """
                 }
                 post {

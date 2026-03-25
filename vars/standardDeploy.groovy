@@ -100,19 +100,14 @@ def call(Map config = [:]) {
 
             stage('Security: Live Attack (OWASP ZAP)') {
                 steps {
-                    script {
-                        // Get the internal IP of the running test container
-                        def testContainerIp = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${serviceName}-test", returnStdout: true).trim()
-                        
-                        sh """
-                        docker run --rm \\
-                            -u root \\
-                            -v "${STAGING_DIR}:/zap/wrk/:rw" \\
-                            ${env.ZAP_IMAGE} zap-baseline.py \\
-                            -t http://${testContainerIp}:${targetPort} \\
-                            -r zap_report.html
-                        """
-                    }
+                    sh """
+                    docker run --rm --network=host \\
+                        -u root \\
+                        -v "${STAGING_DIR}:/zap/wrk/:rw" \\
+                        ${env.ZAP_IMAGE} zap-baseline.py \\
+                        -t http://localhost:${testPort} \\
+                        -r zap_report.html
+                    """
                 }
                 post {
                     always {

@@ -14,7 +14,7 @@ def call(Map config = [:]) {
         environment {
             TRIVY_IMAGE = 'aquasec/trivy:0.69.3'
             SEMGREP_IMAGE = 'returntocorp/semgrep'
-            ZAP_IMAGE = 'owasp/zap2docker-stable'
+            ZAP_IMAGE = 'zaproxy/zap-stable'
             FULL_APP_PATH = "${projectDir}/${appSubdir}"
 			STAGING_DIR = "${projectDir}/jenkins_staging/${env.JOB_NAME}"
             SEMGREP_APP_TOKEN = credentials('SEMGREP_APP_TOKEN')

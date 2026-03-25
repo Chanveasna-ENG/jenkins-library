@@ -93,7 +93,12 @@ def call(Map config = [:]) {
             stage('Deploy Test Instance') {
                 steps {
                     sh "docker rm -f ${serviceName}-test || true"
-                    sh "docker run -d --name ${serviceName}-test -p ${testPort}:${targetPort} ${serviceName}:test"
+                    sh """
+                    docker run -d --name ${serviceName}-test \\
+                        -p ${testPort}:${targetPort} \\
+                        -e GEMINI_API_KEY=dummy_key_for_zap_scan \\
+                        ${serviceName}:test
+                    """
                     sh "sleep 15" 
                 }
             }

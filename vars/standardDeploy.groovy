@@ -102,7 +102,7 @@ def call(Map config = [:]) {
                 steps {
                     sh """
                     docker run --rm --network=host \\
-                        -u root
+                        -u root \\
                         -v "${STAGING_DIR}:/zap/wrk/:rw" \\
                         ${env.ZAP_IMAGE} zap-baseline.py \\
                         -t http://localhost:${testPort} \\

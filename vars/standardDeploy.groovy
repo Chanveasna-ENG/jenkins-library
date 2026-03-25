@@ -38,57 +38,57 @@ def call(Map config = [:]) {
                 }
             }
 
-            // stage('Security: Static Analysis (Semgrep Pro)') {
-            //     steps {
-            //         sh """
-            //         docker run --rm \\
-            //             -v "${STAGING_DIR}:/src" \\
-            //             -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
-            //             -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
-            //             -w /src \\
-            //             ${env.SEMGREP_IMAGE} semgrep ci
-            //         """
-            //     }
-            // }
+            stage('Security: Static Analysis (Semgrep Pro)') {
+                steps {
+                    sh """
+                    docker run --rm \\
+                        -v "${STAGING_DIR}:/src" \\
+                        -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
+                        -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
+                        -w /src \\
+                        ${env.SEMGREP_IMAGE} semgrep ci
+                    """
+                }
+            }
 
-            // stage('Security: Dependency Scan (Trivy FS)') {
-            //     steps {
-            //         sh """
-            //         docker run --rm \\
-            //             -v "${STAGING_DIR}:/src" \\
-            //             -v "${cacheDir}/trivy:/root/.cache/trivy" \\
-            //             -w /src \\
-            //             ${env.TRIVY_IMAGE} fs \\
-            //             --scanners vuln,secret,misconfig \\
-            //             --severity HIGH,CRITICAL \\
-            //             --exit-code 1 \\
-            //             .
-            //         """
-            //     }
-            // }
+            stage('Security: Dependency Scan (Trivy FS)') {
+                steps {
+                    sh """
+                    docker run --rm \\
+                        -v "${STAGING_DIR}:/src" \\
+                        -v "${cacheDir}/trivy:/root/.cache/trivy" \\
+                        -w /src \\
+                        ${env.TRIVY_IMAGE} fs \\
+                        --scanners vuln,secret,misconfig \\
+                        --severity HIGH,CRITICAL \\
+                        --exit-code 1 \\
+                        .
+                    """
+                }
+            }
 
-            // stage('Build Image') {
-            //     steps {
-            //         sh """
-            //         cd ${STAGING_DIR}
-            //         docker build -t ${serviceName}:test .
-            //         """
-            //     }
-            // }
+            stage('Build Image') {
+                steps {
+                    sh """
+                    cd ${STAGING_DIR}
+                    docker build -t ${serviceName}:test .
+                    """
+                }
+            }
 
-            // stage('Security: Image Scan (Trivy Image)') {
-            //     steps {
-            //         sh """
-            //         docker run --rm \\
-            //             -v /var/run/docker.sock:/var/run/docker.sock \\
-            //             -v ${cacheDir}/trivy:/root/.cache/trivy \\
-            //             ${env.TRIVY_IMAGE} image \\
-            //             --severity HIGH,CRITICAL \\
-            //             --exit-code 1 \\
-            //             ${serviceName}:test
-            //         """
-            //     }
-            // }
+            stage('Security: Image Scan (Trivy Image)') {
+                steps {
+                    sh """
+                    docker run --rm \\
+                        -v /var/run/docker.sock:/var/run/docker.sock \\
+                        -v ${cacheDir}/trivy:/root/.cache/trivy \\
+                        ${env.TRIVY_IMAGE} image \\
+                        --severity HIGH,CRITICAL \\
+                        --exit-code 1 \\
+                        ${serviceName}:test
+                    """
+                }
+            }
 
             stage('Deploy Test Instance') {
                 steps {

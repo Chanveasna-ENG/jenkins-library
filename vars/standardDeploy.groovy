@@ -1,6 +1,7 @@
 def call(Map config = [:]) {
     String repoUrl = config.get('repoUrl', 'https://github.com/Chanveasna-ENG/jenkins-library')
     String branch = config.get('branch', 'main')
+	String credentialsId = config.get('credentialsId', '') 
     String projectDir = config.get('projectDir', '/home/user/project')
     String serviceName = config.get('serviceName', 'my-app')
     String appSubdir = config.get('appSubdir', 'jenkins-library')
@@ -24,7 +25,7 @@ def call(Map config = [:]) {
             stage('Checkout') {
                 steps {
                     retry(3) {
-                        git url: repoUrl, branch: branch
+                        git url: repoUrl, branch: branch, credentialsId: credentialsId
                     }
                 }
             }

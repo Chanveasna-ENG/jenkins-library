@@ -9,6 +9,7 @@ def call(Map config = [:]) {
     String testPort = config.get('testPort', '5000') 
     String cacheDir = config.get('cacheDir', '/home/user/cache')
     String agentLabel = config.get('agentLabel', 'local-jenkins-agent')
+    String envFile = config.get('envFile', '')
 
     pipeline {
         agent { label agentLabel }
@@ -130,6 +131,9 @@ def call(Map config = [:]) {
                     docker tag ${serviceName}:test ${serviceName}:latest
                     mkdir -p ${FULL_APP_PATH}
                     rsync -a --delete --exclude='.git' --exclude='jenkins_staging' ${STAGING_DIR}/ ${FULL_APP_PATH}/
+                    if [ -n \"${envFile}\" ]; then
+                        cp -f ${envFile} ${FULL_APP_PATH}/.env
+                    fi
                     cd ${projectDir}
                     docker compose up -d ${serviceName}
                     """

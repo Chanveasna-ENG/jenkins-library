@@ -129,7 +129,7 @@ def call(Map config = [:]) {
                     sh """
                     docker tag ${serviceName}:test ${serviceName}:latest
                     mkdir -p ${FULL_APP_PATH}
-                    rsync -a --delete --exclude='.git' ${STAGING_DIR}/ ${FULL_APP_PATH}/
+                    rsync -a --delete --exclude='.git' --exclude='jenkins_staging' ${STAGING_DIR}/ ${FULL_APP_PATH}/
                     cd ${projectDir}
                     docker compose up -d ${serviceName}
                     """

@@ -8,9 +8,10 @@ def call(Map config = [:]) {
     String targetPort = config.get('targetPort', '6000') 
     String testPort = config.get('testPort', '5000') 
     String cacheDir = config.get('cacheDir', '/home/user/cache')
+    String agentLabel = config.get('agentLabel', 'local-jenkins-agent')
 
     pipeline {
-        agent any
+        agent { label agentLabel }
 
         environment {
             TRIVY_IMAGE = 'aquasec/trivy:0.71.1'

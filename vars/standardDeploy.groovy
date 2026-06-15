@@ -48,7 +48,7 @@ def call(Map config = [:]) {
                         -v "${cacheDir}/semgrep:/root/.cache/semgrep" \\
                         -e SEMGREP_APP_TOKEN=\${SEMGREP_APP_TOKEN} \\
                         -w /src \\
-                        ${env.SEMGREP_IMAGE} semgrep scan --config auto --metrics=off
+                        ${env.SEMGREP_IMAGE} semgrep scan --config auto
                     """
                 }
             }
